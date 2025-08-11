@@ -1,0 +1,54 @@
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<div id="env-widget" style="
+  font-family: 'Inter', Arial, sans-serif;
+  padding: 15px;
+  border-radius: 10px;
+  background: #400073;
+  color: white;
+  width: 280px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+">
+  <h3 id="env-city" style="margin:0 0 5px;">Loading...</h3>
+  <p id="env-aqi" style="margin:5px 0; font-size:1.8em; font-weight:bold;">AQI: --</p>
+  <p id="env-uv" style="margin:5px 0; font-size:1.2em;">UV Index: --</p>
+  <small id="env-updated" style="opacity:0.8;">Updated: --</small>
+</div>
+
+<script>
+  const aqiToken = "902f87a0a51e5839820aae018e6d08cebfdcd2b8";
+  const city = "Kuala Lumpur";
+  const lat = 3.139, lon = 101.687;
+
+  async function updateWidget() {
+    // Fetch AQI
+    const aqiRes = await fetch(`https://api.waqi.info/feed/${city}/?token=${aqiToken}`);
+    const aqiData = await aqiRes.json();
+    // Fetch UV
+    const uvRes = await fetch(`https://currentuvindex.com/api/v1/uvi?latitude=${lat}&longitude=${lon}`);
+    const uvData = await uvRes.json();
+
+    const aqiEl = document.getElementById("env-aqi");
+    const uvEl = document.getElementById("env-uv");
+    const cityEl = document.getElementById("env-city");
+    const updEl = document.getElementById("env-updated");
+
+    if (aqiData.status === "ok") {
+      aqiEl.textContent = `AQI: ${aqiData.data.aqi}`;
+      cityEl.textContent = aqiData.data.city.name;
+    } else {
+      aqiEl.textContent = "AQI: N/A";
+      cityEl.textContent = city;
+    }
+
+    if (uvData.ok) {
+      uvEl.textContent = `UV Index: ${uvData.now.uvi}`;
+    } else {
+      uvEl.textContent = "UV Index: N/A";
+    }
+
+    updEl.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+  }
+
+  updateWidget();
+  setInterval(updateWidget, 30 * 60 * 1000); // refresh every 30 minutes
+</script>
